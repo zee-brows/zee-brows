@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BarChart3, BriefcaseBusiness, FileImage, Home, Inbox, LogOut, Plus, Save, Search, Settings, Trash2 } from "lucide-react";
@@ -72,22 +72,39 @@ function UploadField({ label, value, onChange }) {
 export default function AdminPage() {
   const router = useRouter();
   const [content, saveContent, status] = useSiteContent();
+  const [draft, setDraft] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
-  const messageCount = content.messages?.length || 0;
+  const [saveMessage, setSaveMessage] = useState("");
+  const [dirty, setDirty] = useState(false);
+  const data = draft || content;
+  const messageCount = data.messages?.length || 0;
 
-  const save = (section, value) => saveContent((current) => ({ ...current, [section]: value }));
+  useEffect(() => {
+    if (!draft && status === "ready") setDraft(content);
+  }, [content, draft, status]);
+
+  const updateDraft = (updater) => {
+    setSaveMessage("");
+    setDirty(true);
+    setDraft((current) => {
+      const base = current || content;
+      return typeof updater === "function" ? updater(base) : updater;
+    });
+  };
+
+  const save = (section, value) => updateDraft((current) => ({ ...current, [section]: value }));
   const updateArray = (section, index, patch) => {
-    saveContent((current) => {
+    updateDraft((current) => {
       const next = [...(current[section] || [])];
       next[index] = { ...next[index], ...patch };
       return { ...current, [section]: next };
     });
   };
   const removeArrayItem = (section, index) => {
-    saveContent((current) => ({ ...current, [section]: (current[section] || []).filter((_, itemIndex) => itemIndex !== index) }));
+    updateDraft((current) => ({ ...current, [section]: (current[section] || []).filter((_, itemIndex) => itemIndex !== index) }));
   };
   const addProject = () => {
-    saveContent((current) => ({
+    updateDraft((current) => ({
       ...current,
       projects: [
         ...(current.projects || []),
@@ -102,7 +119,7 @@ export default function AdminPage() {
     }));
   };
 
-  const exportJson = useMemo(() => JSON.stringify(content, null, 2), [content]);
+  const exportJson = useMemo(() => JSON.stringify(data, null, 2), [data]);
 
   const logout = async () => {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -110,7 +127,30 @@ export default function AdminPage() {
     router.refresh();
   };
 
-  const resetContent = async () => saveContent(defaultContent);
+  const resetContent = () => {
+    setDraft(defaultContent);
+    setDirty(true);
+    setSaveMessage("Demo content loaded into draft. Click Save to publish it.");
+  };
+
+  const persistDraft = async () => {
+    setSaveMessage("");
+    const saved = await saveContent(draft || content);
+    setDraft(saved);
+    setDirty(false);
+    setSaveMessage("Saved successfully. Public website content has been refreshed.");
+    router.refresh();
+  };
+
+  if (!draft && status === "loading") {
+    return (
+      <main className="admin-shell">
+        <section className="admin-main">
+          <div className="admin-panel"><p>Loading Zee Brows content...</p></div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="admin-shell">
@@ -133,27 +173,30 @@ export default function AdminPage() {
           <div>
             <span className="eyebrow">Website CMS</span>
             <h2>{tabs.find(([key]) => key === activeTab)?.[1]}</h2>
-            <p className="admin-save-status">{status === "saving" ? "Saving changes..." : status === "error" ? "Save/load error" : "Content synced"}</p>
+            <p className="admin-save-status">
+              {status === "saving" ? "Saving changes..." : status === "error" ? "Save/load error" : dirty ? "Unsaved draft changes" : "Content synced"}
+            </p>
+            {saveMessage ? <p className="admin-success">{saveMessage}</p> : null}
           </div>
           <div className="admin-actions">
             <button className="btn btn-ghost" onClick={resetContent}>Reset Demo Content</button>
-            <button className="btn" onClick={() => saveContent(content)}><Save size={17} /> Save</button>
+            <button className="btn" onClick={persistDraft}><Save size={17} /> Save</button>
           </div>
         </header>
 
         {activeTab === "home" && (
           <div className="admin-panel">
-            <Field label="Loader Text" value={content.home.loaderText} onChange={(value) => save("home", { ...content.home, loaderText: value })} />
-            <Field label="Hero Eyebrow" value={content.home.eyebrow} onChange={(value) => save("home", { ...content.home, eyebrow: value })} />
-            <Field label="Hero Headline" value={content.home.headline} onChange={(value) => save("home", { ...content.home, headline: value })} multiline />
-            <Field label="Hero Subtext" value={content.home.subtext} onChange={(value) => save("home", { ...content.home, subtext: value })} multiline />
-            <UploadField label="Hero Image / Video Poster" value={content.home.heroImage} onChange={(value) => save("home", { ...content.home, heroImage: value })} />
+            <Field label="Loader Text" value={data.home.loaderText} onChange={(value) => save("home", { ...data.home, loaderText: value })} />
+            <Field label="Hero Eyebrow" value={data.home.eyebrow} onChange={(value) => save("home", { ...data.home, eyebrow: value })} />
+            <Field label="Hero Headline" value={data.home.headline} onChange={(value) => save("home", { ...data.home, headline: value })} multiline />
+            <Field label="Hero Subtext" value={data.home.subtext} onChange={(value) => save("home", { ...data.home, subtext: value })} multiline />
+            <UploadField label="Hero Image / Video Poster" value={data.home.heroImage} onChange={(value) => save("home", { ...data.home, heroImage: value })} />
           </div>
         )}
 
         {activeTab === "stages" && (
           <div className="admin-list">
-            {content.stages.map((stage, index) => (
+            {data.stages.map((stage, index) => (
               <article className="admin-panel" key={stage.key}>
                 <h3>{stage.kicker} - {stage.title}</h3>
                 <Field label="Title" value={stage.title} onChange={(value) => updateArray("stages", index, { title: value })} />
@@ -167,7 +210,7 @@ export default function AdminPage() {
 
         {activeTab === "services" && (
           <div className="admin-list">
-            {content.services.map((service, index) => (
+            {data.services.map((service, index) => (
               <article className="admin-panel" key={service.slug}>
                 <h3>{service.title}</h3>
                 <Field label="Title" value={service.title} onChange={(value) => updateArray("services", index, { title: value })} />
@@ -182,7 +225,7 @@ export default function AdminPage() {
         {activeTab === "portfolio" && (
           <div className="admin-list">
             <button className="btn" onClick={addProject}><Plus size={17} /> Add Project / Case Study</button>
-            {content.projects.map((project, index) => (
+            {data.projects.map((project, index) => (
               <article className="admin-panel" key={`${project.name}-${index}`}>
                 <div className="admin-row-head">
                   <h3>{project.name}</h3>
@@ -201,7 +244,7 @@ export default function AdminPage() {
         {activeTab === "messages" && (
           <div className="admin-list">
             {messageCount === 0 ? <p className="admin-empty">No contact messages yet.</p> : null}
-            {(content.messages || []).map((message, index) => (
+            {(data.messages || []).map((message, index) => (
               <article className="admin-panel" key={message.id}>
                 <div className="admin-row-head">
                   <h3>{message.name || "Website Inquiry"}</h3>
@@ -221,9 +264,9 @@ export default function AdminPage() {
 
         {activeTab === "seo" && (
           <div className="admin-panel">
-            <Field label="Meta Title" value={content.seo.title} onChange={(value) => save("seo", { ...content.seo, title: value })} />
-            <Field label="Meta Description" value={content.seo.description} onChange={(value) => save("seo", { ...content.seo, description: value })} multiline />
-            <Field label="Keywords" value={content.seo.keywords} onChange={(value) => save("seo", { ...content.seo, keywords: value })} multiline />
+            <Field label="Meta Title" value={data.seo.title} onChange={(value) => save("seo", { ...data.seo, title: value })} />
+            <Field label="Meta Description" value={data.seo.description} onChange={(value) => save("seo", { ...data.seo, description: value })} multiline />
+            <Field label="Keywords" value={data.seo.keywords} onChange={(value) => save("seo", { ...data.seo, keywords: value })} multiline />
             <label className="admin-field">
               <span>JSON Export / Supabase Seed</span>
               <textarea readOnly rows="12" value={exportJson} />
@@ -233,12 +276,12 @@ export default function AdminPage() {
 
         {activeTab === "contact" && (
           <div className="admin-panel">
-            {Object.entries(content.contact).map(([key, value]) => (
+            {Object.entries(data.contact).map(([key, value]) => (
               <Field
                 key={key}
                 label={key.replaceAll("_", " ")}
                 value={value}
-                onChange={(nextValue) => save("contact", { ...content.contact, [key]: nextValue })}
+                onChange={(nextValue) => save("contact", { ...data.contact, [key]: nextValue })}
               />
             ))}
           </div>

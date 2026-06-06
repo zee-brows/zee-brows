@@ -1441,6 +1441,12 @@ form .btn {
   color: var(--muted);
 }
 
+.admin-success {
+  margin: 8px 0 0;
+  color: #77f2a1;
+  font-weight: 800;
+}
+
 .admin-shell {
   display: grid;
   grid-template-columns: 290px minmax(0, 1fr);
