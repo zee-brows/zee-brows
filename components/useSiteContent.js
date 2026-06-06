@@ -6,7 +6,7 @@ import { defaultContent, mergeContent } from "@/lib/siteContent";
 export async function writeStoredContent(nextContent) {
   const merged = mergeContent(nextContent);
   const response = await fetch("/api/content", {
-    method: "POST",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(merged)
   });
@@ -44,12 +44,9 @@ export function useSiteContent() {
   }, []);
 
   const saveContent = async (updater) => {
-    let optimistic;
-    setContent((current) => {
-      const next = typeof updater === "function" ? updater(current) : updater;
-      optimistic = mergeContent(next);
-      return optimistic;
-    });
+    const next = typeof updater === "function" ? updater(content) : updater;
+    const optimistic = mergeContent(next);
+    setContent(optimistic);
     setStatus("saving");
     try {
       const saved = await writeStoredContent(optimistic);

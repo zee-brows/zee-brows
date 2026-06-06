@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BarChart3, BriefcaseBusiness, FileImage, Home, Inbox, LogOut, Plus, Save, Search, Settings, Trash2 } from "lucide-react";
@@ -73,6 +73,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [content, saveContent, status] = useSiteContent();
   const [draft, setDraft] = useState(null);
+  const draftRef = useRef(null);
   const [activeTab, setActiveTab] = useState("home");
   const [saveMessage, setSaveMessage] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -80,7 +81,10 @@ export default function AdminPage() {
   const messageCount = data.messages?.length || 0;
 
   useEffect(() => {
-    if (!draft && status === "ready") setDraft(content);
+    if (!draft && status === "ready") {
+      setDraft(content);
+      draftRef.current = content;
+    }
   }, [content, draft, status]);
 
   const updateDraft = (updater) => {
@@ -88,7 +92,9 @@ export default function AdminPage() {
     setDirty(true);
     setDraft((current) => {
       const base = current || content;
-      return typeof updater === "function" ? updater(base) : updater;
+      const next = typeof updater === "function" ? updater(base) : updater;
+      draftRef.current = next;
+      return next;
     });
   };
 
@@ -129,14 +135,18 @@ export default function AdminPage() {
 
   const resetContent = () => {
     setDraft(defaultContent);
+    draftRef.current = defaultContent;
     setDirty(true);
     setSaveMessage("Demo content loaded into draft. Click Save to publish it.");
   };
 
   const persistDraft = async () => {
     setSaveMessage("");
-    const saved = await saveContent(draft || content);
+    const latestDraft = draftRef.current || draft || content;
+    console.info("Saving Zee Brows admin draft", { contactEmail: latestDraft.contact?.email });
+    const saved = await saveContent(latestDraft);
     setDraft(saved);
+    draftRef.current = saved;
     setDirty(false);
     setSaveMessage("Saved successfully. Public website content has been refreshed.");
     router.refresh();
