@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, ChevronDown, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { services } from "@/lib/data";
 import { useSiteContent } from "@/components/useSiteContent";
+import ExperienceEnhancers from "@/components/ExperienceEnhancers";
 
 const menu = [
   ["Home", "/"],
@@ -108,6 +109,7 @@ export function SiteShell({ children }) {
 
   return (
     <>
+      <ExperienceEnhancers />
       <Header />
       {children}
       <WhatsAppButton />

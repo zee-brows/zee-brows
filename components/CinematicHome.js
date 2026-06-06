@@ -210,6 +210,7 @@ function Loader({ text }) {
 
 export default function CinematicHome() {
   const storyRef = useRef(null);
+  const heroRef = useRef(null);
   const [activeStage, setActiveStage] = useState(0);
   const [content] = useSiteContent();
   const home = content.home || defaultContent.home;
@@ -220,7 +221,17 @@ export default function CinematicHome() {
 
     const ctx = gsap.context(() => {
       const words = gsap.utils.toArray(".mega-word");
-      gsap.set(words, { opacity: 0.1, yPercent: 28 });
+      gsap.set(words, { opacity: 0.1, yPercent: 28, rotateX: -12 });
+      gsap.fromTo(
+        ".cinema-hero-copy > *",
+        { opacity: 0, y: 34, filter: "blur(12px)" },
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 1, stagger: 0.08, ease: "power3.out", delay: 0.35 }
+      );
+      gsap.fromTo(
+        ".cinema-hero .morph-object",
+        { opacity: 0, scale: 0.86, rotateY: -18 },
+        { opacity: 1, scale: 1, rotateY: 0, duration: 1.1, ease: "expo.out", delay: 0.25 }
+      );
 
       ScrollTrigger.create({
         trigger: ".cinema-story",
@@ -235,6 +246,18 @@ export default function CinematicHome() {
             rotateY: self.progress * 34,
             rotateX: -8 + self.progress * 14,
             scale: 0.96 + self.progress * 0.12,
+            y: Math.sin(self.progress * Math.PI * 2) * 22,
+            duration: 0.25,
+            overwrite: true
+          });
+          gsap.to(".stage-copy", {
+            y: -self.progress * 44,
+            rotateX: 4 - self.progress * 7,
+            duration: 0.25,
+            overwrite: true
+          });
+          gsap.to(".stage-scene.active img", {
+            scale: 1.04 + self.progress * 0.06,
             duration: 0.25,
             overwrite: true
           });
@@ -243,6 +266,7 @@ export default function CinematicHome() {
             gsap.to(word, {
               opacity: distance < 0.13 ? 1 : 0.12,
               yPercent: distance < 0.13 ? 0 : 28,
+              rotateX: distance < 0.13 ? 0 : -14,
               duration: 0.22,
               overwrite: true
             });
@@ -254,14 +278,52 @@ export default function CinematicHome() {
     return () => ctx.revert();
   }, [stages.length]);
 
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    const target = { x: 0, y: 0 };
+    const current = { x: 0, y: 0 };
+    const move = (event) => {
+      const rect = hero.getBoundingClientRect();
+      target.x = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+      target.y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    };
+    const animate = () => {
+      current.x += (target.x - current.x) * 0.08;
+      current.y += (target.y - current.y) * 0.08;
+      hero.style.setProperty("--hero-x", current.x.toFixed(3));
+      hero.style.setProperty("--hero-y", current.y.toFixed(3));
+      frame = requestAnimationFrame(animate);
+    };
+
+    hero.addEventListener("pointermove", move, { passive: true });
+    frame = requestAnimationFrame(animate);
+    return () => {
+      cancelAnimationFrame(frame);
+      hero.removeEventListener("pointermove", move);
+    };
+  }, []);
+
   const CurrentIcon = stageMeta[stages[activeStage]?.key]?.icon || Target;
 
   return (
     <main className="cinematic-home" ref={storyRef}>
       <Loader text={home.loaderText || "Travel • Tech • Media"} />
-      <section className="cinema-hero">
+      <section className="cinema-hero" ref={heroRef}>
         <MediaBackground src={home.heroImage || "/assets/hero.png"} alt="Zee Brows cinematic digital growth scene" priority />
         <ThreeAtmosphere />
+        <div className="hero-orb" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="light-streaks" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </div>
         <div className="cinema-hero-object">
           <MorphObject activeStage={0} stages={stages} />
         </div>
