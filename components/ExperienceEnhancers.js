@@ -64,6 +64,25 @@ export default function ExperienceEnhancers() {
   }, []);
 
   useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      const progress = Math.min(window.scrollY / 700, 1);
+      document.documentElement.style.setProperty("--scroll-shift", progress.toFixed(3));
+      frame = 0;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  useEffect(() => {
     if (prefersReducedMotion()) return;
 
     const pointerDown = (event) => {

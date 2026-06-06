@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, BarChart3, Clapperboard, Code2, Palette, Search, Share2, Target } from "lucide-react";
@@ -208,6 +208,30 @@ function Loader({ text }) {
   );
 }
 
+function SplitHeadline({ text }) {
+  const words = useMemo(() => (text || "").split(" ").filter(Boolean), [text]);
+
+  return (
+    <h1 className="split-headline" aria-label={text}>
+      {words.map((word, wordIndex) => (
+        <span className="headline-word" key={`${word}-${wordIndex}`}>
+          {word.split("").map((letter, letterIndex) => (
+            <span
+              className="headline-letter"
+              style={{ "--letter-delay": `${wordIndex * 0.12 + letterIndex * 0.024}s` }}
+              aria-hidden="true"
+              key={`${letter}-${letterIndex}`}
+            >
+              {letter}
+            </span>
+          ))}
+        </span>
+      ))}
+      <span className="headline-light" aria-hidden="true" />
+    </h1>
+  );
+}
+
 export default function CinematicHome() {
   const storyRef = useRef(null);
   const heroRef = useRef(null);
@@ -223,7 +247,7 @@ export default function CinematicHome() {
       const words = gsap.utils.toArray(".mega-word");
       gsap.set(words, { opacity: 0.1, yPercent: 28, rotateX: -12 });
       gsap.fromTo(
-        ".cinema-hero-copy > *",
+        ".cinema-hero-copy .eyebrow, .cinema-hero-copy p, .cinema-hero-copy .actions",
         { opacity: 0, y: 34, filter: "blur(12px)" },
         { opacity: 1, y: 0, filter: "blur(0px)", duration: 1, stagger: 0.08, ease: "power3.out", delay: 0.35 }
       );
@@ -272,6 +296,22 @@ export default function CinematicHome() {
             });
           });
         }
+      });
+
+      gsap.utils.toArray(".section-head, .copy, .final-cta > div").forEach((section) => {
+        gsap.fromTo(
+          section,
+          { opacity: 0, y: 44, rotateX: -8, filter: "blur(10px)" },
+          {
+            opacity: 1,
+            y: 0,
+            rotateX: 0,
+            filter: "blur(0px)",
+            duration: 0.85,
+            ease: "power3.out",
+            scrollTrigger: { trigger: section, start: "top 82%" }
+          }
+        );
       });
     }, storyRef);
 
@@ -329,7 +369,7 @@ export default function CinematicHome() {
         </div>
         <div className="cinema-hero-copy">
           <span className="eyebrow">{home.eyebrow}</span>
-          <h1>{home.headline}</h1>
+          <SplitHeadline text={home.headline} />
           <p>{home.subtext}</p>
           <div className="actions">
             <Link className="btn" href="/contact">Start Your Project <ArrowUpRight size={18} /></Link>

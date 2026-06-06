@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, ChevronDown, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowUpRight, ChevronDown, Mail, MapPin, Menu, MessageCircle, Phone, X } from "lucide-react";
 import { services } from "@/lib/data";
 import { useSiteContent } from "@/components/useSiteContent";
 import ExperienceEnhancers from "@/components/ExperienceEnhancers";
@@ -18,8 +19,15 @@ const menu = [
 ];
 
 export function Header() {
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
   return (
-    <header className="site-header">
+    <header className={`site-header ${open ? "menu-open" : ""}`}>
       <Link className="brand" href="/">
         <Image src="/assets/logo-3d.png" alt="Zee Brows logo" width={54} height={54} />
         <span>
@@ -27,7 +35,10 @@ export function Header() {
           <small>Travel • Tech • Media</small>
         </span>
       </Link>
-      <nav>
+      <button className="mobile-menu-toggle" type="button" aria-label="Toggle menu" onClick={() => setOpen((value) => !value)}>
+        {open ? <X size={22} /> : <Menu size={22} />}
+      </button>
+      <nav className="primary-nav">
         {menu.map(([label, href]) =>
           label === "Services" ? (
             <div className="nav-dropdown" key={label}>
