@@ -232,6 +232,45 @@ function SplitHeadline({ text }) {
   );
 }
 
+function AgencySignature() {
+  const pillars = [
+    ["Market clarity", "Audience intent, offer positioning, and channel priorities are mapped before creative production begins."],
+    ["Creative systems", "Every post, landing page, ad, and video is shaped from one visual language instead of disconnected assets."],
+    ["Performance rhythm", "Campaigns are reviewed, refined, and scaled through measurable weekly learning loops."]
+  ];
+  const steps = ["Discover", "Position", "Design", "Launch", "Measure", "Scale"];
+
+  return (
+    <section className="agency-signature">
+      <div className="signature-copy">
+        <span className="eyebrow">Zee Brows Method</span>
+        <h2>Digital growth designed like a brand system, not a bundle of services.</h2>
+        <p>
+          Zee Brows builds the connective tissue between strategy, content, ads, websites, branding, and video. The result is a sharper
+          digital presence where every touchpoint looks intentional, speaks clearly, and moves the customer closer to action.
+        </p>
+      </div>
+      <div className="signature-panel">
+        {pillars.map(([title, text], index) => (
+          <article key={title}>
+            <b>{String(index + 1).padStart(2, "0")}</b>
+            <h3>{title}</h3>
+            <p>{text}</p>
+          </article>
+        ))}
+      </div>
+      <div className="signature-process">
+        {steps.map((step, index) => (
+          <span key={step}>
+            <i>{String(index + 1).padStart(2, "0")}</i>
+            {step}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function CinematicHome() {
   const storyRef = useRef(null);
   const heroRef = useRef(null);
@@ -416,6 +455,7 @@ export default function CinematicHome() {
         })}
       </section>
 
+      <AgencySignature />
       <PortfolioPreview />
       <Metrics />
       <FinalCta />

@@ -21,6 +21,7 @@ const menu = [
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const isActive = (href) => (href === "/" ? pathname === "/" : pathname?.startsWith(href));
 
   useEffect(() => {
     setOpen(false);
@@ -41,8 +42,8 @@ export function Header() {
       <nav className="primary-nav">
         {menu.map(([label, href]) =>
           label === "Services" ? (
-            <div className="nav-dropdown" key={label}>
-              <Link href={href}>
+            <div className={`nav-dropdown ${isActive(href) ? "active" : ""}`} key={label}>
+              <Link className="nav-link" href={href}>
                 Services <ChevronDown size={14} />
               </Link>
               <div className="dropdown-panel">
@@ -54,7 +55,7 @@ export function Header() {
               </div>
             </div>
           ) : (
-            <Link href={href} key={label}>
+            <Link className={`nav-link ${isActive(href) ? "active" : ""}`} href={href} key={label}>
               {label}
             </Link>
           )

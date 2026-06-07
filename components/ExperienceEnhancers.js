@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
-const interactiveSelector = "a, button, .service-card, .project-card, .portfolio-mock, .industry-card, .journey-item, .glass";
 const pressSelector = ".btn, button, .service-card, .project-card, .portfolio-mock, .industry-card, .journey-item";
 
 function prefersReducedMotion() {
@@ -13,55 +12,6 @@ function prefersReducedMotion() {
 
 export default function ExperienceEnhancers() {
   const pathname = usePathname();
-  const dotRef = useRef(null);
-  const ringRef = useRef(null);
-  const mouse = useRef({ x: 0, y: 0 });
-  const ring = useRef({ x: 0, y: 0 });
-  const [cursorActive, setCursorActive] = useState(false);
-  const [showCursor, setShowCursor] = useState(false);
-
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const finePointer = window.matchMedia("(pointer: fine)");
-    if (!finePointer.matches || window.innerWidth < 900) return;
-
-    setShowCursor(true);
-    let frame = 0;
-    const move = (event) => {
-      mouse.current.x = event.clientX;
-      mouse.current.y = event.clientY;
-    };
-    const animate = () => {
-      ring.current.x += (mouse.current.x - ring.current.x) * 0.18;
-      ring.current.y += (mouse.current.y - ring.current.y) * 0.18;
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${mouse.current.x}px, ${mouse.current.y}px, 0)`;
-      }
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ring.current.x}px, ${ring.current.y}px, 0) translate(-50%, -50%)`;
-      }
-      frame = requestAnimationFrame(animate);
-    };
-
-    const enter = (event) => {
-      if (event.target.closest(interactiveSelector)) setCursorActive(true);
-    };
-    const leave = (event) => {
-      if (event.target.closest(interactiveSelector)) setCursorActive(false);
-    };
-
-    window.addEventListener("pointermove", move, { passive: true });
-    document.addEventListener("pointerover", enter);
-    document.addEventListener("pointerout", leave);
-    frame = requestAnimationFrame(animate);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("pointermove", move);
-      document.removeEventListener("pointerover", enter);
-      document.removeEventListener("pointerout", leave);
-    };
-  }, []);
 
   useEffect(() => {
     let frame = 0;
@@ -139,12 +89,6 @@ export default function ExperienceEnhancers() {
 
   return (
     <>
-      {showCursor ? (
-        <>
-          <span className={`cursor-dot ${cursorActive ? "is-active" : ""}`} ref={dotRef} />
-          <span className={`cursor-ring ${cursorActive ? "is-active" : ""}`} ref={ringRef} />
-        </>
-      ) : null}
       <AnimatePresence mode="wait">
         <motion.span
           key={pathname}

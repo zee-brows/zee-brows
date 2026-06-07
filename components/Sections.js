@@ -56,6 +56,10 @@ export function ServiceGrid({ showAll = true }) {
       <Reveal className="section-head">
         <span className="eyebrow">Services</span>
         <h2>Digital Services Built for Business Growth</h2>
+        <p>
+          Each service is planned to work with the others: content that supports ads, websites that convert traffic, branding that sharpens trust,
+          and reporting that makes the next move obvious.
+        </p>
       </Reveal>
       <div className="card-grid">
         {cards.map((item, index) => {
@@ -64,6 +68,7 @@ export function ServiceGrid({ showAll = true }) {
           return (
             <Reveal className="service-card glass" delay={index * 0.025} key={item.title}>
               <div className="icon-3d"><Icon size={28} /></div>
+              <span className="card-index">{String(index + 1).padStart(2, "0")}</span>
               <h3>{item.title}</h3>
               <p>{item.short || item.text}</p>
               <Link href={href}>Learn More <ArrowUpRight size={15} /></Link>
@@ -139,11 +144,14 @@ export function Metrics() {
 
 export function PortfolioPreview() {
   return (
-    <section className="section">
+    <section className="section portfolio-preview-section">
       <Reveal className="section-head">
         <span className="eyebrow">Portfolio</span>
-        <h2>Creative Work That Speaks for Itself</h2>
-        <p>Explore selected branding, marketing, social media, and digital projects crafted by Zee Brows.</p>
+        <h2>Work shaped for screens, campaigns, and customers in motion.</h2>
+        <p>
+          Preview selected campaign systems, brand visuals, website interfaces, and social-first assets. Client names stay inside the full
+          portfolio, while the homepage keeps the focus on craft and presentation.
+        </p>
       </Reveal>
       <div className="portfolio-strip">
         {[1, 2, 3].map((item) => (
@@ -163,8 +171,8 @@ export function FinalCta() {
   return (
     <section className="final-cta">
       <Reveal>
-        <h2>Ready to Grow Your Brand Digitally?</h2>
-        <p>Let&apos;s build a strategy that helps your business stand out, attract customers, and grow with confidence.</p>
+        <h2>Ready to make your digital presence feel unmistakably yours?</h2>
+        <p>Bring Zee Brows your brand, offer, or campaign goal. We&apos;ll shape the strategy, visuals, launch plan, and optimization rhythm around it.</p>
         <Link className="btn" href="/contact">Start Your Project <ArrowUpRight size={18} /></Link>
       </Reveal>
     </section>
