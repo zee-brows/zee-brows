@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArrowUpRight, BarChart3, Clapperboard, Code2, Palette, Search, Share2, Target } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,6 +12,11 @@ import { Metrics, PortfolioPreview, FinalCta } from "@/components/Sections";
 import { useSiteContent } from "@/components/useSiteContent";
 import { defaultContent } from "@/lib/siteContent";
 import { MediaBackground } from "@/components/Media";
+
+const HeroLogo3D = dynamic(() => import("@/components/HeroLogo3D"), {
+  ssr: false,
+  loading: () => <div className="hero-logo-3d hero-logo-loading" aria-hidden="true" />
+});
 
 const stageMeta = {
   strategy: { object: "logo", icon: Target },
@@ -291,9 +297,9 @@ export default function CinematicHome() {
         { opacity: 1, y: 0, filter: "blur(0px)", duration: 1, stagger: 0.08, ease: "power3.out", delay: 0.35 }
       );
       gsap.fromTo(
-        ".cinema-hero .morph-object",
-        { opacity: 0, scale: 0.86, rotateY: -18 },
-        { opacity: 1, scale: 1, rotateY: 0, duration: 1.1, ease: "expo.out", delay: 0.25 }
+        ".cinema-hero .hero-logo-3d",
+        { opacity: 0, scale: 0.78, rotateY: -34, rotateX: 14, filter: "blur(16px)" },
+        { opacity: 1, scale: 1, rotateY: 0, rotateX: 0, filter: "blur(0px)", duration: 1.2, ease: "expo.out", delay: 0.18 }
       );
 
       ScrollTrigger.create({
@@ -403,9 +409,6 @@ export default function CinematicHome() {
           <i />
           <i />
         </div>
-        <div className="cinema-hero-object">
-          <MorphObject activeStage={0} stages={stages} />
-        </div>
         <div className="cinema-hero-copy">
           <span className="eyebrow">{home.eyebrow}</span>
           <SplitHeadline text={home.headline} />
@@ -414,6 +417,9 @@ export default function CinematicHome() {
             <Link className="btn" href="/contact">Start Your Project <ArrowUpRight size={18} /></Link>
             <Link className="btn btn-ghost" href="/portfolio">Explore Work</Link>
           </div>
+        </div>
+        <div className="cinema-hero-object">
+          <HeroLogo3D src={home.heroLogo || "/assets/zee-brows-official-logo-cutout.webp"} />
         </div>
       </section>
 

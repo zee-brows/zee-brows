@@ -201,6 +201,7 @@ export default function AdminPage() {
             <Field label="Hero Headline" value={data.home.headline} onChange={(value) => save("home", { ...data.home, headline: value })} multiline />
             <Field label="Hero Subtext" value={data.home.subtext} onChange={(value) => save("home", { ...data.home, subtext: value })} multiline />
             <UploadField label="Hero Image / Video Poster" value={data.home.heroImage} onChange={(value) => save("home", { ...data.home, heroImage: value })} />
+            <UploadField label="Hero 3D Logo Asset" value={data.home.heroLogo} onChange={(value) => save("home", { ...data.home, heroLogo: value })} />
           </div>
         )}
 
