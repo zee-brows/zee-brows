@@ -926,10 +926,10 @@ form .btn {
   --hero-y: 0;
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+  grid-template-columns: minmax(0, 0.9fr) minmax(460px, 1.1fr);
   align-items: center;
-  gap: clamp(24px, 3.5vw, 58px);
-  padding: 110px clamp(20px, 6vw, 88px) 64px;
+  gap: clamp(24px, 4vw, 74px);
+  padding: 108px clamp(22px, 6vw, 96px) 58px;
   overflow: hidden;
   isolation: isolate;
   background:
@@ -981,14 +981,14 @@ form .btn {
 .cinema-hero-copy {
   position: relative;
   z-index: 4;
-  max-width: 760px;
+  max-width: 900px;
 }
 
 .cinema-hero-copy h1,
 .split-headline {
-  margin: 14px 0 20px;
-  font-size: clamp(3rem, 7vw, 7.8rem);
-  line-height: 0.9;
+  margin: 16px 0 22px;
+  font-size: clamp(4.2rem, 8.2vw, 9.6rem);
+  line-height: 0.84;
   letter-spacing: 0;
 }
 
@@ -1010,10 +1010,9 @@ form .btn {
 
 .headline-word:nth-child(2),
 .headline-word:nth-child(4) {
-  background: linear-gradient(90deg, #ffffff, #f7c846 50%, #ff3542);
+  background: linear-gradient(90deg, #ffffff, #d8c08a 50%, #8b1117);
   -webkit-background-clip: text;
   color: transparent;
-  filter: drop-shadow(0 0 22px rgba(209, 13, 24, 0.22));
 }
 
 .headline-letter {
@@ -1023,18 +1022,16 @@ form .btn {
   transform-origin: 50% 70%;
   animation: headlineLetterIn 760ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
   animation-delay: var(--letter-delay);
-  text-shadow: 0 0 26px rgba(209, 13, 24, 0.22), 0 0 18px rgba(247, 200, 70, 0.08);
 }
 
 .headline-light {
   position: absolute;
   left: 4%;
   bottom: -0.08em;
-  width: min(520px, 72%);
-  height: 0.08em;
+  width: min(460px, 62%);
+  height: 1px;
   border-radius: 999px;
-  background: linear-gradient(90deg, transparent, rgba(247, 200, 70, 0.9), rgba(209, 13, 24, 0.8), transparent);
-  box-shadow: 0 0 30px rgba(247, 200, 70, 0.32), 0 0 38px rgba(209, 13, 24, 0.22);
+  background: linear-gradient(90deg, transparent, rgba(216, 192, 138, 0.72), rgba(139, 17, 23, 0.52), transparent);
   transform-origin: left center;
   animation: headlineLight 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
 }
@@ -1053,10 +1050,10 @@ form .btn {
 }
 
 .cinema-hero-copy p {
-  max-width: 640px;
-  color: #d7d7dc;
-  font-size: clamp(1rem, 1.35vw, 1.24rem);
-  line-height: 1.74;
+  max-width: 590px;
+  color: #d3d3d6;
+  font-size: clamp(1rem, 1.22vw, 1.16rem);
+  line-height: 1.72;
 }
 
 .cinema-hero-object,
@@ -1323,7 +1320,7 @@ form .btn {
 }
 
 .hero-logo-showroom {
-  width: min(760px, 48vw);
+  width: min(820px, 50vw);
   aspect-ratio: 1;
   cursor: default;
   animation: none;
@@ -2415,12 +2412,12 @@ form .btn {
   .cinema-hero {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding: 104px 18px 52px;
-    gap: 18px;
+    padding: 104px 18px 44px;
+    gap: 8px;
   }
 
   .cinema-hero-object {
-    min-height: 300px;
+    min-height: 360px;
     order: 2;
   }
 
@@ -2431,7 +2428,7 @@ form .btn {
   }
 
   .hero-logo-showroom {
-    width: min(520px, 92vw);
+    width: min(560px, 94vw);
   }
 
   .hero-logo-stack {
@@ -2573,8 +2570,8 @@ form .btn {
   .split-headline {
     max-width: 100%;
     gap: 0.08em 0.16em;
-    font-size: clamp(2.32rem, 13.2vw, 3.7rem);
-    line-height: 0.96;
+    font-size: clamp(3rem, 14.8vw, 4.7rem);
+    line-height: 0.88;
     transform: none;
   }
 
@@ -2594,7 +2591,7 @@ form .btn {
   }
 
   .cinema-hero-object {
-    min-height: 280px;
+    min-height: 330px;
     transform: none;
   }
 
@@ -2604,7 +2601,7 @@ form .btn {
   }
 
   .hero-logo-showroom {
-    width: min(360px, 94vw);
+    width: min(390px, 96vw);
     aspect-ratio: 1;
   }
 

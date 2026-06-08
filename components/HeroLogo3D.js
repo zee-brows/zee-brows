@@ -4,6 +4,50 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useLoader, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+function useLogoCells(src, columns, rows) {
+  const [cells, setCells] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = columns;
+      canvas.height = rows;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.clearRect(0, 0, columns, rows);
+      ctx.drawImage(image, 0, 0, columns, rows);
+      const pixels = ctx.getImageData(0, 0, columns, rows).data;
+      const next = [];
+
+      for (let y = 0; y < rows; y += 1) {
+        for (let x = 0; x < columns; x += 1) {
+          const alpha = pixels[(y * columns + x) * 4 + 3];
+          if (alpha > 74) {
+            const neighbors = [
+              y > 0 ? pixels[((y - 1) * columns + x) * 4 + 3] : 0,
+              y < rows - 1 ? pixels[((y + 1) * columns + x) * 4 + 3] : 0,
+              x > 0 ? pixels[(y * columns + x - 1) * 4 + 3] : 0,
+              x < columns - 1 ? pixels[(y * columns + x + 1) * 4 + 3] : 0
+            ];
+            const edge = neighbors.some((value) => value < 62);
+            if (alpha > 150 || edge) next.push({ x, y, alpha: alpha / 255, edge });
+          }
+        }
+      }
+
+      if (active) setCells(next);
+    };
+    image.src = src;
+    return () => {
+      active = false;
+    };
+  }, [src, columns, rows]);
+
+  return cells;
+}
+
 function ReflectionTexture() {
   return useMemo(() => {
     const canvas = document.createElement("canvas");
@@ -36,13 +80,17 @@ function ReflectionTexture() {
 function LogoSculpture({ src, pointer, reduced }) {
   const group = useRef(null);
   const face = useRef(null);
+  const relief = useRef(null);
   const texture = useLoader(THREE.TextureLoader, src);
   const reflection = ReflectionTexture();
   const { viewport } = useThree();
   const isMobile = viewport.width < 6.2;
-  const size = isMobile ? 3.15 : 4.25;
+  const size = isMobile ? 3.34 : 4.62;
   const width = size * 0.67;
   const height = size;
+  const columns = isMobile ? 44 : 58;
+  const rows = isMobile ? 66 : 88;
+  const cells = useLogoCells(src, columns, rows);
 
   useEffect(() => {
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -50,7 +98,38 @@ function LogoSculpture({ src, pointer, reduced }) {
     texture.needsUpdate = true;
   }, [texture]);
 
-  const depthLayers = useMemo(() => Array.from({ length: isMobile ? 10 : 18 }), [isMobile]);
+  const depthLayers = useMemo(() => Array.from({ length: isMobile ? 12 : 24 }), [isMobile]);
+  const reliefGeometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
+
+  useEffect(() => () => reliefGeometry.dispose(), [reliefGeometry]);
+
+  useEffect(() => {
+    if (!relief.current || !cells.length) return;
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+    const cellW = width / columns;
+    const cellH = height / rows;
+
+    cells.forEach((cell, index) => {
+      const px = (cell.x / (columns - 1) - 0.5) * width;
+      const py = -(cell.y / (rows - 1) - 0.5) * height;
+      const sx = cellW * 1.08;
+      const sy = cellH * 1.08;
+      const sz = cell.edge ? 0.18 : 0.28 + cell.alpha * 0.16;
+      matrix.compose(
+        new THREE.Vector3(px, py, 0.06 + sz * 0.5),
+        new THREE.Quaternion(),
+        new THREE.Vector3(sx, sy, sz)
+      );
+      relief.current.setMatrixAt(index, matrix);
+      color.set(cell.edge ? "#8a693c" : cell.alpha > 0.78 ? "#1b0809" : "#0e0e0e");
+      relief.current.setColorAt(index, color);
+    });
+
+    relief.current.count = cells.length;
+    relief.current.instanceMatrix.needsUpdate = true;
+    if (relief.current.instanceColor) relief.current.instanceColor.needsUpdate = true;
+  }, [cells, columns, height, rows, width]);
 
   useFrame((state, delta) => {
     const elapsed = state.clock.elapsedTime;
@@ -75,21 +154,39 @@ function LogoSculpture({ src, pointer, reduced }) {
   });
 
   return (
-    <group ref={group} scale={isMobile ? 0.94 : 1}>
+    <group ref={group} scale={isMobile ? 0.92 : 1}>
+      <mesh position={[0, -0.03, -0.34]} rotation={[0, 0, 0]}>
+        <boxGeometry args={[width * 1.08, height * 1.045, 0.22, 8, 8, 1]} />
+        <meshPhysicalMaterial color="#050505" metalness={0.92} roughness={0.22} clearcoat={1} clearcoatRoughness={0.18} reflectivity={1} />
+      </mesh>
+      <mesh position={[0.025, -0.035, -0.205]}>
+        <planeGeometry args={[width * 1.04, height * 1.02, 1, 1]} />
+        <meshPhysicalMaterial
+          alphaMap={texture}
+          transparent
+          color="#070707"
+          metalness={0.98}
+          roughness={0.2}
+          clearcoat={0.9}
+          clearcoatRoughness={0.2}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
       {depthLayers.map((_, index) => {
-        const z = -0.026 * (index + 1);
+        const z = -0.016 * (index + 1);
         const shade = index / Math.max(depthLayers.length - 1, 1);
         return (
-          <mesh position={[0, 0, z]} key={index}>
+          <mesh position={[index * 0.0025, index * -0.001, z]} scale={[1 + shade * 0.018, 1 + shade * 0.018, 1]} key={index}>
             <planeGeometry args={[width, height, 1, 1]} />
             <meshPhysicalMaterial
               alphaMap={texture}
               transparent
-              color={new THREE.Color().setHSL(0, 0, 0.055 + shade * 0.035)}
+              color={shade > 0.82 ? "#7a5b33" : new THREE.Color().setHSL(0, 0, 0.045 + shade * 0.04)}
               metalness={0.96}
-              roughness={0.23 + shade * 0.08}
-              clearcoat={0.65}
-              clearcoatRoughness={0.34}
+              roughness={0.18 + shade * 0.12}
+              clearcoat={0.9}
+              clearcoatRoughness={0.22}
               reflectivity={0.72}
               side={THREE.DoubleSide}
               depthWrite={false}
@@ -97,7 +194,19 @@ function LogoSculpture({ src, pointer, reduced }) {
           </mesh>
         );
       })}
-      <mesh position={[0, 0, 0.035]}>
+      {cells.length ? (
+        <instancedMesh ref={relief} args={[reliefGeometry, undefined, cells.length]} frustumCulled={false}>
+          <meshPhysicalMaterial
+            vertexColors
+            metalness={0.98}
+            roughness={0.16}
+            clearcoat={1}
+            clearcoatRoughness={0.16}
+            reflectivity={1}
+          />
+        </instancedMesh>
+      ) : null}
+      <mesh position={[0, 0, 0.49]}>
         <planeGeometry args={[width, height, 1, 1]} />
         <meshPhysicalMaterial
           ref={face}
@@ -106,28 +215,26 @@ function LogoSculpture({ src, pointer, reduced }) {
           transparent
           color="#111111"
           metalness={1}
-          roughness={0.16}
+          roughness={0.12}
           clearcoat={1}
-          clearcoatRoughness={0.18}
+          clearcoatRoughness={0.12}
           reflectivity={1}
           side={THREE.DoubleSide}
           depthWrite={false}
         />
       </mesh>
-      <mesh position={[0.035, 0.02, 0.058]}>
-        <planeGeometry args={[width * 0.992, height * 0.992, 1, 1]} />
+      <mesh position={[0.055, 0.025, 0.515]}>
+        <planeGeometry args={[width * 1.006, height * 1.006, 1, 1]} />
         <meshPhysicalMaterial
           alphaMap={texture}
           transparent
-          color="#2a0a0b"
-          emissive="#220506"
-          emissiveIntensity={0.06}
-          metalness={0.92}
-          roughness={0.2}
-          clearcoat={0.8}
-          clearcoatRoughness={0.2}
+          color="#8e6c3f"
+          metalness={1}
+          roughness={0.14}
+          clearcoat={1}
+          clearcoatRoughness={0.12}
           side={THREE.DoubleSide}
-          opacity={0.34}
+          opacity={0.32}
           depthWrite={false}
         />
       </mesh>
