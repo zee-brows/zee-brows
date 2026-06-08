@@ -924,12 +924,12 @@ form .btn {
   position: relative;
   --hero-x: 0;
   --hero-y: 0;
-  min-height: 100vh;
+  min-height: 100svh;
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(460px, 1.1fr);
   align-items: center;
   gap: clamp(24px, 4vw, 74px);
-  padding: 108px clamp(22px, 6vw, 96px) 58px;
+  padding: 118px clamp(22px, 6vw, 96px) 72px;
   overflow: hidden;
   isolation: isolate;
   background:
@@ -987,8 +987,8 @@ form .btn {
 .cinema-hero-copy h1,
 .split-headline {
   margin: 16px 0 22px;
-  font-size: clamp(4.2rem, 8.2vw, 9.6rem);
-  line-height: 0.84;
+  font-size: clamp(3.4rem, 6.8vw, 7.6rem);
+  line-height: 0.94;
   letter-spacing: 0;
 }
 
@@ -1320,44 +1320,172 @@ form .btn {
 }
 
 .hero-logo-showroom {
-  width: min(820px, 50vw);
+  width: min(680px, 48vw);
   aspect-ratio: 1;
   cursor: default;
   animation: none;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #030303;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 34px 120px rgba(0, 0, 0, 0.62);
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
 }
 
-.hero-logo-showroom canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
+.hero-logo-visible {
+  --logo-tilt-x: -8deg;
+  --logo-tilt-y: 18deg;
+  --logo-tilt-z: 0deg;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  opacity: 1;
+  transform-style: preserve-3d;
+  perspective: 1200px;
 }
 
-.hero-logo-showroom::before,
-.hero-logo-showroom::after {
-  content: "";
+.logo-showroom-light {
+  position: absolute;
+  inset: 6% 0 2%;
+  z-index: -3;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 52% 42%, rgba(255, 255, 255, 0.12), transparent 17%),
+    radial-gradient(circle at 38% 46%, rgba(95, 10, 14, 0.44), transparent 42%),
+    radial-gradient(circle at 68% 56%, rgba(172, 132, 66, 0.24), transparent 35%),
+    radial-gradient(ellipse at 50% 72%, rgba(255, 255, 255, 0.06), transparent 48%);
+  filter: blur(10px);
+  opacity: 0.9;
+}
+
+.logo-sculpture {
+  position: relative;
+  width: 72%;
+  height: 82%;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--logo-tilt-x)) rotateY(var(--logo-tilt-y)) rotateZ(var(--logo-tilt-z)) translateZ(30px);
+  animation: logoSculptureFloat 5.2s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.logo-depth-layer,
+.logo-main-face {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   pointer-events: none;
+  -webkit-user-drag: none;
 }
 
-.hero-logo-showroom::before {
+.logo-depth-layer {
+  opacity: 0.24;
+  transform: translate3d(calc(var(--layer) * -1.45px), calc(var(--layer) * 1.15px), calc(var(--layer) * -9px));
+  filter:
+    brightness(0.16)
+    contrast(1.42)
+    sepia(0.25)
+    saturate(1.45)
+    hue-rotate(328deg)
+    drop-shadow(0 1px 0 rgba(172, 132, 66, 0.28));
+}
+
+.logo-depth-layer:nth-child(4n) {
+  opacity: 0.18;
+  filter:
+    brightness(0.28)
+    sepia(0.9)
+    saturate(1.9)
+    hue-rotate(350deg)
+    drop-shadow(0 0 8px rgba(172, 132, 66, 0.16));
+}
+
+.logo-main-face {
+  z-index: 4;
+  transform: translateZ(34px);
+  filter:
+    saturate(1.12)
+    contrast(1.2)
+    brightness(0.78)
+    drop-shadow(0 34px 52px rgba(0, 0, 0, 0.54))
+    drop-shadow(0 0 22px rgba(99, 10, 14, 0.26));
+}
+
+.logo-metal-sheen,
+.logo-gold-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  mask-image: url("/assets/zee-brows-official-logo-cutout.webp");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: url("/assets/zee-brows-official-logo-cutout.webp");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.logo-metal-sheen {
+  transform: translateZ(48px);
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04), transparent 16% 80%, rgba(255, 255, 255, 0.03)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 20% 76%, rgba(0, 0, 0, 0.5));
+    linear-gradient(105deg, transparent 18%, rgba(255, 255, 255, 0.32) 34%, transparent 48%),
+    linear-gradient(64deg, rgba(8, 8, 8, 0.62), rgba(120, 13, 18, 0.24), rgba(224, 176, 96, 0.2));
   mix-blend-mode: screen;
+  opacity: 0.58;
+  animation: logoSheenPass 4s ease-in-out infinite;
 }
 
-.hero-logo-showroom::after {
-  border: 1px solid rgba(255, 255, 255, 0.075);
-  border-radius: inherit;
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+.logo-gold-edge {
+  transform: translate3d(7px, -5px, 44px) scale(1.01);
+  background: linear-gradient(135deg, rgba(223, 178, 94, 0.52), transparent 38%, rgba(111, 14, 19, 0.34));
+  mix-blend-mode: screen;
+  opacity: 0.42;
+}
+
+.logo-floor-shadow {
+  position: absolute;
+  left: 24%;
+  right: 20%;
+  bottom: 8%;
+  height: 13%;
+  z-index: -2;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.28) 48%, transparent 72%);
+  filter: blur(16px);
+  transform: rotateX(72deg);
+}
+
+.logo-reflection {
+  position: absolute;
+  left: 32%;
+  right: 28%;
+  bottom: -4%;
+  height: 26%;
+  z-index: -1;
+  overflow: hidden;
+  opacity: 0.18;
+  filter: blur(2px) saturate(1.08);
+  transform: rotateX(72deg);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 78%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 78%);
+}
+
+.logo-reflection img {
+  width: 100%;
+  height: 190%;
+  object-fit: contain;
+  transform: scaleY(-1) translateY(20%);
+}
+
+@keyframes logoSculptureFloat {
+  to { transform: rotateX(var(--logo-tilt-x)) rotateY(var(--logo-tilt-y)) rotateZ(var(--logo-tilt-z)) translate3d(0, -16px, 30px); }
+}
+
+@keyframes logoSheenPass {
+  0%, 42% { opacity: 0.3; transform: translateX(-16%) translateZ(48px); }
+  58% { opacity: 0.68; }
+  100% { opacity: 0.34; transform: translateX(16%) translateZ(48px); }
 }
 
 .morph-object {
