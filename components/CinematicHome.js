@@ -11,7 +11,6 @@ import * as THREE from "three";
 import { Metrics, PortfolioPreview, FinalCta } from "@/components/Sections";
 import { useSiteContent } from "@/components/useSiteContent";
 import { defaultContent } from "@/lib/siteContent";
-import { MediaBackground } from "@/components/Media";
 
 const HeroLogo3D = dynamic(() => import("@/components/HeroLogo3D"), {
   ssr: false,
@@ -397,18 +396,6 @@ export default function CinematicHome() {
     <main className="cinematic-home" ref={storyRef}>
       <Loader text={home.loaderText || "Travel • Tech • Media"} />
       <section className="cinema-hero" ref={heroRef}>
-        <MediaBackground src={home.heroImage || "/assets/hero.png"} alt="Zee Brows cinematic digital growth scene" priority />
-        <ThreeAtmosphere />
-        <div className="hero-orb" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <div className="light-streaks" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </div>
         <div className="cinema-hero-copy">
           <span className="eyebrow">{home.eyebrow}</span>
           <SplitHeadline text={home.headline} />
